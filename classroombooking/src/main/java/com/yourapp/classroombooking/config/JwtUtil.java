@@ -10,8 +10,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "mysecretkeymysecretkeymysecretkey"; // 32+ chars
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    // 🔐 Must be at least 32 characters for HS256
+    private final String SECRET = "mysecretkeymysecretkeymysecretkey";
 
     public String generateToken(String username) {
         return Jwts.builder()
