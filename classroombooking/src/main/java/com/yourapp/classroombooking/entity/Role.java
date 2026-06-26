@@ -2,5 +2,7 @@ package com.yourapp.classroombooking.entity;
 
 public enum Role {
     USER,
-    ADMIN
+    ADMIN,
+    FACULTY,
+    STUDENT
 }

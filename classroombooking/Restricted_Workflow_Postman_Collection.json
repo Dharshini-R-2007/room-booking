@@ -1,0 +1,346 @@
+{
+	"info": {
+		"_postman_id": "c1a2b3c4-d5e6-4a5b-6c7d-8e9f0a1b2c3d",
+		"name": "Classroom Booking - Restricted Auth & Faculty Management",
+		"description": "API collection for testing Classroom Booking System. Self-registration is disabled. Admins add Faculty, and Faculty add Students.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "1. Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.globals.set(\"admin_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin@college.edu\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in as the Admin user to fetch the JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login as newly added Faculty",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.globals.set(\"faculty_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"johndoe@college.edu\",\n    \"password\": \"FAC001\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in using the Faculty credentials created by the Admin (username = email, password = facultyId)."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Login as newly added Student",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"student1@college.edu\",\n    \"password\": \"12-05-2005\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in using the Student credentials created by the Faculty (username = collegeMail, password = dob)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Faculty Management (Admin Only)",
+			"item": [
+				{
+					"name": "1. Create Faculty (Auto-creates User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"facultyId\": \"FAC001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"johndoe@college.edu\",\n    \"phoneNumber\": \"1234567890\",\n    \"department\": \"Computer Science\",\n    \"designation\": \"Professor\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/faculties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties"
+							]
+						},
+						"description": "Admin creates a faculty member. This auto-creates a User record in the database."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get All Faculties",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/faculties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties"
+							]
+						},
+						"description": "Admin retrieves all faculty records."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Update Faculty (Auto-syncs User)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"facultyId\": \"FAC001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe Modified\",\n    \"email\": \"johndoe@college.edu\",\n    \"phoneNumber\": \"9876543210\",\n    \"department\": \"Computer Science\",\n    \"designation\": \"Professor\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/faculties/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties",
+								"1"
+							]
+						},
+						"description": "Admin updates a faculty record. Any email modifications are synchronized with their auth username."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Delete Faculty (Auto-deletes User)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/faculties/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties",
+								"1"
+							]
+						},
+						"description": "Admin deletes a faculty member. Their associated auth user record is also deleted."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student Management (Faculty Only)",
+			"item": [
+				{
+					"name": "1. Create Student (Faculty Access)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{faculty_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rollNumber\": \"CS2026001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"student1@college.edu\",\n    \"phoneNumber\": \"+1234567890\",\n    \"department\": \"Computer Science\",\n    \"year\": 3,\n    \"section\": \"A\",\n    \"dob\": \"12-05-2005\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/students",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"description": "Faculty adds a student record. The default credentials will be: username = student1@college.edu, password = 12-05-2005."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Create Student (Admin Access - Forbidden)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rollNumber\": \"CS2026002\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Smith\",\n    \"email\": \"student2@college.edu\",\n    \"phoneNumber\": \"+9876543210\",\n    \"department\": \"Mechanical Engineering\",\n    \"year\": 3,\n    \"section\": \"A\",\n    \"dob\": \"22-10-2005\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/students",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"students"
+							]
+						},
+						"description": "Admin tries to add a student. This should return 403 Forbidden because only FACULTY role is allowed."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

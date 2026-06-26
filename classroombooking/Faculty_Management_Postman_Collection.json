@@ -1,0 +1,364 @@
+{
+	"info": {
+		"_postman_id": "c1a2b3c4-d5e6-4a5b-6c7d-8e9f0a1b2c3d",
+		"name": "Classroom Booking - Faculty Management",
+		"description": "API collection for testing the Faculty Management Module endpoints with Spring Security role-based access control.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Admin User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin2@college.edu\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user (Note: Default role is FACULTY. Change role to ADMIN in the DB to use as admin)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.globals.set(\"admin_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin@college.edu\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in with the upgraded ADMIN credentials to receive a JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Faculty User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"test_fac@college.edu\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user that defaults to FACULTY role for access restriction testing."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Faculty",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.globals.set(\"faculty_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"test_fac@college.edu\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in with the FACULTY credentials to test security restrictions."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Faculty Management",
+			"item": [
+				{
+					"name": "Create Faculty (Admin Access)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"facultyId\": \"FAC001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"johndoe@college.edu\",\n    \"phoneNumber\": \"1234567890\",\n    \"department\": \"Computer Science\",\n    \"designation\": \"Professor\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/faculties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties"
+							]
+						},
+						"description": "Creates a new Faculty record. Accessible only by ADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Faculty (Faculty Access - Forbidden)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{faculty_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"facultyId\": \"FAC002\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Smith\",\n    \"email\": \"janesmith@college.edu\",\n    \"phoneNumber\": \"9876543210\",\n    \"department\": \"Mechanical Engineering\",\n    \"designation\": \"Assistant Professor\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/faculties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties"
+							]
+						},
+						"description": "Attempt to create a Faculty using a FACULTY token. Should return 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Faculties (Admin Access)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/faculties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties"
+							]
+						},
+						"description": "Retrieves list of all faculties. Accessible only by ADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Faculty by ID (Admin Access)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/faculties/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties",
+								"1"
+							]
+						},
+						"description": "Retrieves a single faculty by their primary key ID. Accessible only by ADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Faculty (Admin Access)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"facultyId\": \"FAC001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe Modified\",\n    \"email\": \"johndoe@college.edu\",\n    \"phoneNumber\": \"1122334455\",\n    \"department\": \"Computer Science & Eng\",\n    \"designation\": \"Professor & Head\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/faculties/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties",
+								"1"
+							]
+						},
+						"description": "Updates a faculty member by ID. Accessible only by ADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Faculty (Admin Access)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/faculties/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"faculties",
+								"1"
+							]
+						},
+						"description": "Deletes a faculty member by ID. Accessible only by ADMIN."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
