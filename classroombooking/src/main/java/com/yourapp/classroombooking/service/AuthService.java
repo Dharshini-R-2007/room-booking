@@ -9,6 +9,7 @@ import com.yourapp.classroombooking.entity.User;
 import com.yourapp.classroombooking.repository.UserRepository;
 import com.yourapp.classroombooking.config.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

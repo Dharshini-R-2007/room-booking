@@ -12,7 +12,7 @@ import java.util.Date;
 public class JwtUtil {
 
     // 🔐 Must be at least 32 characters for HS256
-    private final String SECRET = "mysecretkeymysecretkeymysecretkey";
+    private final String SECRET = "mysecretkeymysecretkeymysecretkey"; // Its not completely safe we can use the in java to generate the key
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
